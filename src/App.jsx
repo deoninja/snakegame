@@ -5,7 +5,7 @@ import { faSun, faMoon, faVolumeUp, faVolumeMute, faPlay, faPause, faRedo, faArr
 
 const eatSound = new Audio('/sounds/eat.mp3');
 const gameOverSound = new Audio('/sounds/gameover.mp3');
-const moveSound = new Audio('/sounds/move.mp3');
+const moveSound = new Audio('/sounds/lies-and-more-lies.mp3');
 
 const playSoundSafely = (sound, enabled = true) => {
   if (!enabled) return;
@@ -106,7 +106,7 @@ function App() {
       try {
         eatSound.src = '/sounds/eat.mp3';
         gameOverSound.src = '/sounds/gameover.mp3';
-        moveSound.src = '/sounds/move.mp3';
+        moveSound.src = '/sounds/lies-and-more-lies.mp3';
         
         eatSound.volume = 0.3;
         gameOverSound.volume = 0.4;

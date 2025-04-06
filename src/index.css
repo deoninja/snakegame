@@ -1,0 +1,29 @@
+@import "tailwindcss";
+
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+  100% { transform: scale(1); }
+}
+
+.pulse-animation {
+  animation: pulse 2s infinite;
+}
+
+.snake-cell {
+  transition: all 0.1s ease;
+}
+
+.game-board {
+  box-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
+}
+
+.food-cell {
+  animation: spin 3s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}

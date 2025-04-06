@@ -5,7 +5,7 @@ import { faSun, faMoon, faVolumeUp, faVolumeMute, faPlay, faPause, faRedo, faArr
 
 const eatSound = new Audio('/sounds/eat.mp3');
 const gameOverSound = new Audio('/sounds/gameover.mp3');
-const moveSound = new Audio('/sounds/lies-and-more-lies.mp3');
+const moveSound = new Audio('/sounds/move.mp3');
 
 const playSoundSafely = (sound, enabled = true) => {
   if (!enabled) return;
@@ -15,11 +15,15 @@ const playSoundSafely = (sound, enabled = true) => {
       sound.currentTime = 0;
       const playPromise = sound.play();
       if (playPromise !== undefined) {
-        playPromise.catch(e => console.log("Sound play interrupted:", e));
+        playPromise
+          .then(() => console.log(`${sound.src} played successfully`))
+          .catch(e => console.error(`Failed to play ${sound.src}:`, e));
       }
+    } else {
+      console.warn(`${sound.src} not ready, state: ${sound.readyState}`);
     }
   } catch (e) {
-    console.log("Sound error:", e);
+    console.error("Sound error:", e);
   }
 };
 
@@ -100,40 +104,38 @@ function App() {
   useEffect(() => {
     const loadSoundsAsync = async () => {
       try {
-        eatSound.src = process.env.PUBLIC_URL + '/sounds/eat.mp3';
-        gameOverSound.src = process.env.PUBLIC_URL + '/sounds/gameover.mp3';
-        moveSound.src = process.env.PUBLIC_URL + '/sounds/lies-and-more-lies.mp3';
+        eatSound.src = '/sounds/eat.mp3';
+        gameOverSound.src = '/sounds/gameover.mp3';
+        moveSound.src = '/sounds/move.mp3';
         
         eatSound.volume = 0.3;
         gameOverSound.volume = 0.4;
         moveSound.volume = 0.1;
 
         const promises = [
-          new Promise(resolve => {
-            eatSound.oncanplaythrough = resolve;
+          new Promise((resolve, reject) => {
+            eatSound.oncanplaythrough = () => resolve();
+            eatSound.onerror = () => reject(new Error("Failed to load eat.mp3"));
             eatSound.load();
           }),
-          new Promise(resolve => {
-            gameOverSound.oncanplaythrough = resolve;
+          new Promise((resolve, reject) => {
+            gameOverSound.oncanplaythrough = () => resolve();
+            gameOverSound.onerror = () => reject(new Error("Failed to load gameover.mp3"));
             gameOverSound.load();
           }),
-          new Promise(resolve => {
-            moveSound.oncanplaythrough = resolve;
+          new Promise((resolve, reject) => {
+            moveSound.oncanplaythrough = () => resolve();
+            moveSound.onerror = () => reject(new Error("Failed to load move.mp3"));
             moveSound.load();
           })
         ];
 
-        const timeoutPromise = new Promise(resolve => setTimeout(resolve, 3000));
-        
-        await Promise.race([
-          Promise.all(promises),
-          timeoutPromise
-        ]);
-        
+        await Promise.all(promises);
         setSoundsLoaded(true);
+        console.log("All sounds loaded successfully");
       } catch (error) {
         console.error("Error loading sounds:", error);
-        setSoundsLoaded(true);
+        setSoundsLoaded(false);
       }
     };
 
@@ -301,6 +303,7 @@ function App() {
     gameLoopRef.current = requestAnimationFrame(gameLoop);
 
     if (soundEnabledRef.current && soundsLoadedRef.current) {
+      console.log("Attempting to play moveSound");
       playSoundSafely(moveSound, true);
     }
 
@@ -569,3 +572,4 @@ function App() {
 }
 
 export default App;
+

@@ -3,9 +3,15 @@ import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon, faVolumeUp, faVolumeMute, faPlay, faPause, faRedo, faArrowUp, faArrowDown, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
-const eatSound = new Audio('/sounds/eat.mp3');
-const gameOverSound = new Audio('/sounds/gameover.mp3');
-const moveSound = new Audio('/sounds/lies-and-more-lies.mp3');
+// Import audio files from src/assets/sounds
+import eatSoundFile from './assets/sounds/eat.mp3';
+import gameOverSoundFile from './assets/sounds/gameover.mp3';
+import moveSoundFile from './assets/sounds/lies-and-more-lies.mp3';
+
+// Initialize Audio objects with imported files
+const eatSound = new Audio(eatSoundFile);
+const gameOverSound = new Audio(gameOverSoundFile);
+const moveSound = new Audio(moveSoundFile);
 
 const playSoundSafely = (sound, enabled = true) => {
   if (!enabled) return;
@@ -104,13 +110,10 @@ function App() {
   useEffect(() => {
     const loadSoundsAsync = async () => {
       try {
-        eatSound.src = '/sounds/eat.mp3';
-        gameOverSound.src = '/sounds/gameover.mp3';
-        moveSound.src = '/sounds/lies-and-more-lies.mp3';
-        
-        eatSound.volume = 0.3;
-        gameOverSound.volume = 0.4;
-        moveSound.volume = 0.1;
+        // No need to set src again; it's set during initialization
+        eatSound.volume = 0.4;
+        gameOverSound.volume = 0.5;
+        moveSound.volume = 0.4;
 
         const promises = [
           new Promise((resolve, reject) => {
@@ -572,4 +575,3 @@ function App() {
 }
 
 export default App;
-

@@ -5,7 +5,7 @@ import { faSun, faMoon, faVolumeUp, faVolumeMute, faPlay, faPause, faRedo, faArr
 
 import eatSoundFile from './assets/sounds/eat.mp3';
 import gameOverSoundFile from './assets/sounds/gameover.mp3';
-import moveSoundFile from './assets/sounds/move.mp3';
+import moveSoundFile from './assets/sounds/lies-and-more-lies.mp3';
 
 const eatSound = new Audio(eatSoundFile);
 const gameOverSound = new Audio(gameOverSoundFile);
@@ -108,9 +108,9 @@ function App() {
   useEffect(() => {
     const loadSoundsAsync = async () => {
       try {
-        eatSound.volume = 0.3;
-        gameOverSound.volume = 0.4;
-        moveSound.volume = 0.1;
+        eatSound.volume = 0.4;
+        gameOverSound.volume = 0.5;
+        moveSound.volume = 0.4;
 
         const promises = [
           new Promise((resolve, reject) => {
@@ -273,6 +273,8 @@ function App() {
     playSoundSafely(gameOverSound, soundEnabledRef.current && soundsLoadedRef.current);
     setGameOver(true);
     gameOverRef.current = true;
+
+    if(score > highScore)
     setHighScore(prev => {
       const newHighScore = Math.max(prev, score);
       console.log("Game Over - Score:", score, "New High Score:", newHighScore);
@@ -406,8 +408,13 @@ function App() {
 
   useEffect(() => {
     console.log("Saving High Score to localStorage:", highScore);
-    localStorage.setItem('snakeHighScore', highScore.toString());
-  }, [highScore]);
+    if(score > highScore){
+      localStorage.setItem('snakeHighScore', score.toString());
+      setHighScore(score)
+    }
+    
+  }, [score]);
+
 
   const handleBlur = useCallback(() => {
     if (gameStartedRef.current && !gameOverRef.current && !isPausedRef.current) {

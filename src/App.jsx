@@ -3,12 +3,10 @@ import './App.css';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faSun, faMoon, faVolumeUp, faVolumeMute, faPlay, faPause, faRedo, faArrowUp, faArrowDown, faArrowLeft, faArrowRight } from '@fortawesome/free-solid-svg-icons';
 
-// Import audio files from src/assets/sounds
 import eatSoundFile from './assets/sounds/eat.mp3';
 import gameOverSoundFile from './assets/sounds/gameover.mp3';
-import moveSoundFile from './assets/sounds/lies-and-more-lies.mp3';
+import moveSoundFile from './assets/sounds/move.mp3';
 
-// Initialize Audio objects with imported files
 const eatSound = new Audio(eatSoundFile);
 const gameOverSound = new Audio(gameOverSoundFile);
 const moveSound = new Audio(moveSoundFile);
@@ -110,10 +108,9 @@ function App() {
   useEffect(() => {
     const loadSoundsAsync = async () => {
       try {
-        // No need to set src again; it's set during initialization
-        eatSound.volume = 0.4;
-        gameOverSound.volume = 0.5;
-        moveSound.volume = 0.4;
+        eatSound.volume = 0.3;
+        gameOverSound.volume = 0.4;
+        moveSound.volume = 0.1;
 
         const promises = [
           new Promise((resolve, reject) => {
@@ -276,7 +273,11 @@ function App() {
     playSoundSafely(gameOverSound, soundEnabledRef.current && soundsLoadedRef.current);
     setGameOver(true);
     gameOverRef.current = true;
-    setHighScore(prev => Math.max(prev, score));
+    setHighScore(prev => {
+      const newHighScore = Math.max(prev, score);
+      console.log("Game Over - Score:", score, "New High Score:", newHighScore);
+      return newHighScore;
+    });
     if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
   }, [score]);
 
@@ -388,9 +389,12 @@ function App() {
   useEffect(() => {
     const storedHighScore = localStorage.getItem('snakeHighScore');
     if (storedHighScore) {
-      setHighScore(parseInt(storedHighScore));
+      const parsedScore = parseInt(storedHighScore, 10);
+      if (!isNaN(parsedScore)) {
+        setHighScore(parsedScore);
+        console.log("Loaded High Score from localStorage:", parsedScore);
+      }
     }
-
     window.addEventListener('keydown', handleKeyDown);
     
     return () => {
@@ -398,12 +402,11 @@ function App() {
       moveSound.pause();
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, [handleKeyDown]);
+  }, []); // Empty dependency array
 
   useEffect(() => {
-    if (highScore > 0) {
-      localStorage.setItem('snakeHighScore', highScore.toString());
-    }
+    console.log("Saving High Score to localStorage:", highScore);
+    localStorage.setItem('snakeHighScore', highScore.toString());
   }, [highScore]);
 
   const handleBlur = useCallback(() => {

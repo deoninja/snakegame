@@ -218,12 +218,10 @@ function App() {
     if (now - lastMoveTimeRef.current < speed) return;
     lastMoveTimeRef.current = now;
 
-    const currentDirection = pendingDirection || directionRef.current;
-    
     setSnake(prevSnake => {
       const head = { ...prevSnake[0] };
       
-      switch (currentDirection) {
+      switch (directionRef.current) {
         case 'UP': head.y -= 1; break;
         case 'DOWN': head.y += 1; break;
         case 'LEFT': head.x -= 1; break;
@@ -244,8 +242,8 @@ function App() {
       }
 
       const newSnake = [head, ...prevSnake];
-
       const ateFood = checkFoodCollision(head);
+      
       if (ateFood) {
         playSoundSafely(eatSound, soundEnabledRef.current && soundsLoadedRef.current);
         setFood(generateFood());
@@ -262,11 +260,9 @@ function App() {
 
       return newSnake;
     });
-    
-    if (pendingDirection) {
-      setPendingDirection(null);
-    }
-  }, [speed, checkFoodCollision, GRID_SIZE, generateFood, pendingDirection]);
+
+    setPendingDirection(null);
+  }, [speed, checkFoodCollision, GRID_SIZE, generateFood]);
 
   const gameOverAction = useCallback(() => {
     moveSound.pause();
@@ -275,11 +271,11 @@ function App() {
     gameOverRef.current = true;
 
     if(score > highScore)
-    setHighScore(prev => {
-      const newHighScore = Math.max(prev, score);
-      console.log("Game Over - Score:", score, "New High Score:", newHighScore);
-      return newHighScore;
-    });
+      setHighScore(prev => {
+        const newHighScore = Math.max(prev, score);
+        console.log("Game Over - Score:", score, "New High Score:", newHighScore);
+        return newHighScore;
+      });
     if (gameLoopRef.current) cancelAnimationFrame(gameLoopRef.current);
   }, [score]);
 
@@ -373,11 +369,23 @@ function App() {
     const deltaY = touchY - centerY;
 
     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > 0 && directionRef.current !== 'LEFT') setPendingDirection('RIGHT');
-      else if (deltaX < 0 && directionRef.current !== 'RIGHT') setPendingDirection('LEFT');
+      if (deltaX > 0 && directionRef.current !== 'LEFT') {
+        setDirection('RIGHT');
+        directionRef.current = 'RIGHT';
+      }
+      else if (deltaX < 0 && directionRef.current !== 'RIGHT') {
+        setDirection('LEFT');
+        directionRef.current = 'LEFT';
+      }
     } else {
-      if (deltaY > 0 && directionRef.current !== 'UP') setPendingDirection('DOWN');
-      else if (deltaY < 0 && directionRef.current !== 'DOWN') setPendingDirection('UP');
+      if (deltaY > 0 && directionRef.current !== 'UP') {
+        setDirection('DOWN');
+        directionRef.current = 'DOWN';
+      }
+      else if (deltaY < 0 && directionRef.current !== 'DOWN') {
+        setDirection('UP');
+        directionRef.current = 'UP';
+      }
     }
   }, [startGame]);
 
@@ -404,17 +412,14 @@ function App() {
       moveSound.pause();
       window.removeEventListener('keydown', handleKeyDown);
     };
-  }, []); // Empty dependency array
+  }, [handleKeyDown]);
 
   useEffect(() => {
-    console.log("Saving High Score to localStorage:", highScore);
-    if(score > highScore){
+    if (score > highScore) {
       localStorage.setItem('snakeHighScore', score.toString());
-      setHighScore(score)
+      setHighScore(score);
     }
-    
-  }, [score]);
-
+  }, [score, highScore]);
 
   const handleBlur = useCallback(() => {
     if (gameStartedRef.current && !gameOverRef.current && !isPausedRef.current) {
@@ -547,28 +552,52 @@ function App() {
 
         <div className="mt-6 grid grid-cols-3 gap-2 w-full">
           <button 
-            onClick={() => directionRef.current !== 'DOWN' && setPendingDirection('UP')}
+            onClick={() => {
+              if (directionRef.current !== 'DOWN' && gameStarted && !gameOver && !isPaused) {
+                setDirection('UP');
+                setPendingDirection('UP');
+                directionRef.current = 'UP';
+              }
+            }}
             className={`py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg flex justify-center`}
             disabled={!gameStarted || gameOver || isPaused}
           >
             <FontAwesomeIcon icon={faArrowUp} />
           </button>
           <button 
-            onClick={() => directionRef.current !== 'RIGHT' && setPendingDirection('LEFT')}
+            onClick={() => {
+              if (directionRef.current !== 'RIGHT' && gameStarted && !gameOver && !isPaused) {
+                setDirection('LEFT');
+                setPendingDirection('LEFT');
+                directionRef.current = 'LEFT';
+              }
+            }}
             className={`py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg flex justify-center`}
             disabled={!gameStarted || gameOver || isPaused}
           >
             <FontAwesomeIcon icon={faArrowLeft} />
           </button>
           <button 
-            onClick={() => directionRef.current !== 'LEFT' && setPendingDirection('RIGHT')}
+            onClick={() => {
+              if (directionRef.current !== 'LEFT' && gameStarted && !gameOver && !isPaused) {
+                setDirection('RIGHT');
+                setPendingDirection('RIGHT');
+                directionRef.current = 'RIGHT';
+              }
+            }}
             className={`py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg flex justify-center`}
             disabled={!gameStarted || gameOver || isPaused}
           >
             <FontAwesomeIcon icon={faArrowRight} />
           </button>
           <button 
-            onClick={() => directionRef.current !== 'UP' && setPendingDirection('DOWN')}
+            onClick={() => {
+              if (directionRef.current !== 'UP' && gameStarted && !gameOver && !isPaused) {
+                setDirection('DOWN');
+                setPendingDirection('DOWN');
+                directionRef.current = 'DOWN';
+              }
+            }}
             className={`py-3 ${darkMode ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'} rounded-lg flex justify-center col-start-2`}
             disabled={!gameStarted || gameOver || isPaused}
           >
